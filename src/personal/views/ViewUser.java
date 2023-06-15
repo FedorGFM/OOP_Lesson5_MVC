@@ -3,6 +3,7 @@ package personal.views;
 import personal.controllers.UserController;
 import personal.model.FileOperationImpl;
 import personal.model.User;
+import personal.views.validator.NameAndSurnameValidator;
 
 import javax.jws.soap.SOAPBinding;
 import java.util.List;
@@ -34,11 +35,31 @@ public class ViewUser {
                 case LIST:
                     readList();
                     break;
+                case UPDATE:
+                    updateUser();
+                    break;
+                case DELETE:
+                    deleteUser();
+                    break;
             }
         } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
+    }
+
+    private void deleteUser() throws Exception {
+        User user = getUser();
+        userController.deleteUser(user);
+    }
+
+    private void updateUser() throws Exception {
+        readList();
+        User user = getUser();
+        User updatedUser = getNewUser();
+        updatedUser.setId(user.getId());
+        User saveUser = userController.updateUser(updatedUser);
+        System.out.println(saveUser);
     }
 
     private void readList() {
@@ -49,16 +70,29 @@ public class ViewUser {
     }
 
     private void readUser() throws Exception {
-        String id = prompt("Идентификатор пользователя: ");
-        User user = userController.readUser(id);
+        User user = getUser();
         System.out.println(user);
     }
 
-    private void createUser() {
+    private User getUser() throws Exception {
+        String id = prompt("Идентификатор пользователя: ");
+        User user = userController.readUser(id);
+        return user;
+    }
+
+    private void createUser() throws Exception {
+        User user = getNewUser();
+        userController.saveUser(user);
+    }
+
+    private User getNewUser() throws Exception {
         String firstName = prompt("Имя: ");
+        new NameAndSurnameValidator(firstName).validate();
         String lastName = prompt("Фамилия: ");
+        new NameAndSurnameValidator(lastName).validate();
         String phone = prompt("Номер телефона: ");
-        userController.saveUser(new User(firstName, lastName, phone));
+        User user = new User(firstName, lastName, phone);
+        return user;
     }
 
     private String prompt(String message) {
