@@ -26,4 +26,8 @@ public class UserController {
 
         throw new Exception("User not found");
     }
+
+    public List<User> readAllUsers() {
+        return repository.getAllUsers();
+    }
 }
